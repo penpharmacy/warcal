@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#E3F2FD; --card:#fff; --accent:#4CAF50; --muted:#607D8B; --pink:#FFEBEE;
+      --bg:#fde3f2; --card:#fff; --accent:#4CAF50; --muted:#607D8B; --pink:#FFEBEE;
       font-family: 'Kanit', sans-serif;
     }
     body{background:linear-gradient(180deg,var(--bg),#fff);margin:0;padding:20px;color:#263238}
@@ -157,8 +157,8 @@
       else if(inr >=2.0 && inr <=3.0){adj.minPct = 0; adj.maxPct = 0; adj.avgPct = 0; adj.note='ไม่ต้องปรับยา';}
       else if(inr >=3.1 && inr <=3.9){adj.minPct = -0.10; adj.maxPct = -0.05; adj.avgPct = -0.075; adj.note='ลดขนาดยารายสัปดาห์ 5–10%';}
       else if(inr >3.9 && inr <5.0 && bleed==='no'){adj.minPct = -0.10; adj.maxPct = -0.10; adj.avgPct = -0.10; adj.note='หยุดยา 1 วัน แล้วกลับมาเริ่มด้วยขนาดที่ลดลง 10%';}
-      else if(inr >=5.0 && inr <9.0 && bleed==='no'){adj.minPct = -0.20; adj.maxPct = -0.20; adj.avgPct = -0.20; adj.note='หยุดยา 2 วัน แล้วกลับมาเริ่มด้วยขนาดที่ลดลง 20% — พิจารณาให้ Vit K1    1–2.5 mg ถ้ามีความเสี่ยงเลือดออก';}
-      else if(inr >= 9.0 && bleed==='no'){adj.minPct = null; adj.maxPct = null; adj.avgPct = null; adj.note='INR > 9.0: หยุดยา ให้ Vit K1    2.5–5 mg รับประทาน และติดตาม INR อย่างใกล้ชิด — ปรึกษาแพทย์/เภสัชกรเพื่อการปรับยา';}
+      else if(inr >=5.0 && inr <9.0 && bleed==='no'){adj.minPct = -0.20; adj.maxPct = -0.20; adj.avgPct = -0.20; adj.note='หยุดยา 2 วัน แล้วกลับมาเริ่มด้วยขนาดที่ลดลง 20% — พิจารณาให้ Vit K1mg.    1–2.5 mg ถ้ามีความเสี่ยงเลือดออก';}
+      else if(inr >= 9.0 && bleed==='no'){adj.minPct = null; adj.maxPct = null; adj.avgPct = null; adj.note='INR > 9.0: หยุดยา ให้ Vit K1mg.    2.5–5 mg รับประทาน และติดตาม INR อย่างใกล้ชิด — ปรึกษาแพทย์/เภสัชกรเพื่อการปรับยา';}
       if(bleed==='yes'){adj.note = 'พบภาวะเลือดออก: ให้ Vit K1 และพิจารณาการรักษาเฉียบพลันตามข้อแนะนำทางการแพทย์';}
 
       let newRange = {};
