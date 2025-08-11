@@ -99,36 +99,54 @@ function getAdjustment(inr, bleeding) {
 }
 
 function distributeDose(total) {
-  const dayDoses = [0, 0, 0, 0, 0, 0, 0];
-  const options = [3, 1.5, 2, 1]; // 3mg, 3mg ครึ่ง, 2mg, 2mg ครึ่ง
+  const dayCount = 7;
+  const dayDoses = new Array(dayCount).fill({ n3: 0, n2: 0, totalDose: 0 });
+  
+  // หาเม็ด 3 mg มากที่สุดก่อน
+  let max3 = Math.floor(total / 3);
+  let remainder = total - max3 * 3;
+
+  // เติมเม็ด 2 mg สำหรับส่วนที่เหลือ
+  let max2 = Math.round(remainder / 2);
+
+  // ถ้าจำนวนเม็ดยารวมเกิน 7 เม็ด ให้ลดเม็ด 3 mg ลงทีละเม็ด
+  while (max3 + max2 > dayCount) {
+    max3--;
+    remainder = total - max3 * 3;
+    max2 = Math.round(remainder / 2);
+    if (max3 < 0) {
+      max3 = 0;
+      break;
+    }
+  }
+
+  // แจกแจงเม็ด 3 mg และ 2 mg เท่า ๆ กันใน 7 วัน
+  function distributeInt(units) {
+    const base = Math.floor(units / dayCount);
+    let rem = units % dayCount;
+    const arr = new Array(dayCount).fill(base);
+    for (let i = 0; i < rem; i++) arr[i]++;
+    return arr;
+  }
+
+  const arr3 = distributeInt(max3);
+  const arr2 = distributeInt(max2);
+
   const results = [];
-
-  let remaining = total;
-
-  for (let i = 0; i < 7 && remaining > 0.9; i++) {
-    for (let p1 of options) {
-      if (p1 <= remaining + 0.1) {
-        dayDoses[i] = p1;
-        remaining -= p1;
-        break;
-      }
-    }
+  for (let i = 0; i < dayCount; i++) {
+    const n3 = arr3[i];
+    const n2 = arr2[i];
+    const totalDose = n3 * 3 + n2 * 2;
+    results.push({
+      totalDose,
+      pills: [].concat(
+        Array(n3).fill(3),
+        Array(n2).fill(2)
+      )
+    });
   }
-
-  for (let d of dayDoses) {
-    const pills = [];
-    let left = d;
-    while (left >= 3) {
-      pills.push(3);
-      left -= 3;
-    }
-    if (left >= 1.5) {
-      pills.push(1.5); left -= 1.5;
-    } else if (left >= 1.0 && left <= 1.6) {
-      pills.push(1); left -= 1;
-    }
-    results.push({ totalDose: d, pills });
-  }
-
+  
   return results;
+}
+
 }
