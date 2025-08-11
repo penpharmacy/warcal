@@ -162,7 +162,7 @@
       if(bleed==='yes'){adj.note = 'พบภาวะเลือดออก: ให้ Vit K1 และพิจารณาการรักษาเฉียบพลันตามข้อแนะนำทางการแพทย์';}
 
       let newRange = {};
-      if(adj.minPct===null){ newRange.note = 'ไม่แนะนำให้คำนวณขนาดยาอัตโนมัติสำหรับ INR > 9.0 — ให้ผู้เชี่ยวชาญประเมิน'; }
+      if(adj.minPct===null){ newRange.note = 'ไม่แนะนำให้คำนวณขนาดยาอัตโนมัติสำหรับ INR >= 9.0 — ให้ผู้เชี่ยวชาญประเมิน'; }
       else{
         const min = weeklyDose * (1 + adj.minPct);
         const max = weeklyDose * (1 + adj.maxPct);
