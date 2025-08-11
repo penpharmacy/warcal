@@ -99,36 +99,88 @@ function getAdjustment(inr, bleeding) {
 }
 
 function distributeDose(total) {
-  const dayDoses = [0, 0, 0, 0, 0, 0, 0];
-  const options = [3, 1.5, 2, 1]; // 3mg, 3mg ครึ่ง, 2mg, 2mg ครึ่ง
-  const results = [];
-
+  // เริ่มแจก 3 mg เต็มก่อน
+  const dayDoses = Array(7).fill(0);
   let remaining = total;
 
-  for (let i = 0; i < 7 && remaining > 0.9; i++) {
-    for (let p1 of options) {
-      if (p1 <= remaining + 0.1) {
-        dayDoses[i] = p1;
-        remaining -= p1;
-        break;
-      }
+  // แจก 3 mg เต็มวันละ 1 เม็ดให้ครบ 7 วัน หรือจนหมด
+  for (let i = 0; i < 7; i++) {
+    if (remaining >= 3) {
+      dayDoses[i] = 3;
+      remaining -= 3;
     }
   }
 
-  for (let d of dayDoses) {
+  // แจก 2 mg เต็มวันละ 1 เม็ดให้ครบ หรือจนหมด
+  for (let i = 0; i < 7 && remaining >= 2; i++) {
+    dayDoses[i] += 2;
+    remaining -= 2;
+  }
+
+  // แจก 3 mg ครึ่งเม็ด (1.5 mg) หากเหลือ >= 1.5 mg
+  for (let i = 0; i < 7 && remaining >= 1.5; i++) {
+    dayDoses[i] += 1.5;
+    remaining -= 1.5;
+  }
+
+  // แจก 2 mg ครึ่งเม็ด (1 mg) หากเหลือ >= 1 mg
+  for (let i = 0; i < 7 && remaining >= 1; i++) {
+    dayDoses[i] += 1;
+    remaining -= 1;
+  }
+
+  // หากเหลือเศษเล็กน้อย (ต่ำกว่า 1 mg) เติมวันสุดท้าย
+  if (remaining > 0.1) {
+    dayDoses[6] += remaining;
+    remaining = 0;
+  }
+
+  // ตรวจสอบว่ามีวันใดที่มีทั้ง 3 mg และ 2 mg พร้อมกันไหม (รวม >= 5 mg)
+  // ถ้าไม่มีย้าย 2 mg หรือ 2 mg ครึ่งเม็ด มารวมกับ 3 mg ในวันเดียวกัน
+  const hasBoth = dayDoses.some(d => d >= 5);
+  if (!hasBoth) {
+    // หาวันที่มี 3 mg เต็มหรือครึ่ง (>=3)
+    const dayWith3mg = dayDoses.findIndex(d => d >= 3);
+    // หาวันที่มี 2 mg เต็มหรือครึ่ง (อย่างน้อย 1)
+    const dayWith2mg = dayDoses.findIndex(d => d > 0 && d < 3);
+
+    if (dayWith3mg !== -1 && dayWith2mg !== -1 && dayWith3mg !== dayWith2mg) {
+      // ย้ายปริมาณยา 2 mg จากวันที่แยก ไปไว้กับวันที่มียา 3 mg
+      dayDoses[dayWith3mg] += dayDoses[dayWith2mg] > 2 ? 2 : dayDoses[dayWith2mg];
+      dayDoses[dayWith2mg] -= dayDoses[dayWith2mg] > 2 ? 2 : dayDoses[dayWith2mg];
+    }
+  }
+
+  // แปลงแต่ละวันให้เป็นจำนวนเม็ด 3 mg, 3 mg ครึ่ง, 2 mg, 2 mg ครึ่ง
+  const results = dayDoses.map(dose => {
     const pills = [];
-    let left = d;
+    let left = dose;
+
+    // แบ่ง 3 mg เต็มเม็ด
     while (left >= 3) {
       pills.push(3);
       left -= 3;
     }
-    if (left >= 1.5) {
-      pills.push(1.5); left -= 1.5;
-    } else if (left >= 1.0 && left <= 1.6) {
-      pills.push(1); left -= 1;
+    // แบ่ง 3 mg ครึ่งเม็ด (1.5 mg)
+    if (left >= 1.4) {
+      pills.push(1.5);
+      left -= 1.5;
     }
-    results.push({ totalDose: d, pills });
-  }
+    // แบ่ง 2 mg เต็มเม็ด
+    while (left >= 2) {
+      pills.push(2);
+      left -= 2;
+    }
+    // แบ่ง 2 mg ครึ่งเม็ด (1 mg)
+    if (left >= 0.9) {
+      pills.push(1);
+      left -= 1;
+    }
+    // หากเหลือเศษน้อยกว่า 0.9 mg ไม่ใส่ เพราะไม่ใช้เม็ดเล็กกว่านี้
+
+    return { totalDose: dose, pills };
+  });
 
   return results;
+
 }
