@@ -1,12 +1,10 @@
 {
-  "name": "WARFARIN CALCULATOR PPH",
-  "short_name": "Warfarin PPH",
-  "description": "แอปคำนวณขนาดยา Warfarin ตามค่า INR (2mg และ 3mg)",
-  "start_url": "./index.html",
+  "name": "Warfarin Dosing Calculator",
+  "short_name": "WarfarinCalc",
+  "start_url": ".",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#2e86de",
-  "orientation": "portrait",
+  "background_color": "#E3F2FD",
+  "theme_color": "#0288D1",
   "icons": [
     {
       "src": "icons/icon-192.png",

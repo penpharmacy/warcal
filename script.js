@@ -199,6 +199,3 @@ function calculate(){
 
 // initial calculate on load
 document.addEventListener('DOMContentLoaded', ()=>{ calculate(); });
-}
-l calculate on load
-document.addEventListener('DOMContentLoaded', ()=>{ calculate(); });

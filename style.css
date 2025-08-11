@@ -1,129 +1,40 @@
-/* style.css */
-
-body {
-  font-family: 'Sarabun', sans-serif;
-  background-color: #fff0f5;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+:root{
+  --bg:#E3F2FD; 
+  --card:#ffffff;
+  --accent:#0288D1; 
+  --ok:#4CAF50;
+  --muted:#607D8B;
+  font-family: 'Kanit', 'Prompt', system-ui, Arial;
 }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#102027}
+header{background:var(--bg);padding:12px 18px;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:12px}
+.logo{width:44px;height:44px;border-radius:8px;background:linear-gradient(90deg,#0288D1,#81D4FA);display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+header h1{font-size:18px;margin:0;color:#0D47A1}
 
-.container {
-  display: flex;
-  flex-wrap: wrap;
-  max-width: 1200px;
-  margin: auto;
-  padding: 20px;
-  gap: 20px;
-}
+main{max-width:980px;margin:18px auto;padding:18px}
+.card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 6px 18px rgba(2,136,209,0.06);margin-bottom:16px}
 
-.column {
-  flex: 1;
-  min-width: 300px;
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(255, 105, 180, 0.2);
-}
+form .row{display:flex;gap:12px;margin-bottom:12px}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+input[type=number], select{width:100%;padding:10px;border-radius:8px;border:1px solid #cfd8dc}
 
-h1 {
-  color: #d63384;
-  text-align: center;
-}
+.col{flex:1}
+.radio-row{display:flex;gap:12px;align-items:center}
+.radio{display:flex;align-items:center;gap:6px;padding:6px 10px;background:#fafafa;border-radius:8px;border:1px solid #eee}
+button.primary{background:var(--ok);color:#fff;border:0;padding:10px 16px;border-radius:10px;font-weight:600}
+button.ghost{background:transparent;border:1px solid rgba(0,0,0,0.08);padding:8px 12px;border-radius:8px}
 
-label {
-  display: block;
-  margin-top: 15px;
-  color: #444;
-  font-weight: bold;
-}
+.results{display:grid;grid-template-columns:1fr;gap:12px}
+.result-head{display:flex;justify-content:space-between;align-items:center}
+.plan-table{width:100%;border-collapse:collapse}
+.plan-table th,.plan-table td{padding:8px;border-bottom:1px solid #f0f0f0;text-align:center}
+.small{font-size:13px;color:var(--muted)}
 
-input, select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border: 2px solid #f8c4d9;
-  border-radius: 5px;
-  font-size: 16px;
-}
+footer{max-width:980px;margin:10px auto 40px;text-align:center;color:var(--muted)}
 
-button {
-  background-color: #ff69b4;
-  color: white;
-  border: none;
-  padding: 12px;
-  font-size: 16px;
-  border-radius: 5px;
-  margin-top: 20px;
-  cursor: pointer;
-  width: 100%;
-}
+@media (max-width:700px){.row{flex-direction:column}.result-head{flex-direction:column;align-items:flex-start;gap:8px}}
 
-button:hover {
-  background-color: #ff1493;
-}
-
-#output {
-  margin-top: 20px;
-}
-
-.card {
-  background-color: #fce4ec;
-  padding: 15px;
-  border-left: 5px solid #e91e63;
-  margin-bottom: 20px;
-  border-radius: 8px;
-}
-
-.card.info {
-  border-left-color: #2196f3;
-  background-color: #e3f2fd;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-.table th, .table td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: center;
-}
-
-.day-pill {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.pill {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.pill-2mg {
-  background-color: orange;
-}
-
-.pill-3mg {
-  background-color: dodgerblue;
-}
-
-.pill-half-2mg {
-  background: linear-gradient(to right, orange 50%, white 50%);
-}
-
-.pill-half-3mg {
-  background: linear-gradient(to right, dodgerblue 50%, white 50%);
-}
-
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-  }
-}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-weight:600}
+.pill-3{background:linear-gradient(90deg,#BBDEFB,#90CAF9);color:#042A4A}
+.pill-2{background:linear-gradient(90deg,#FFE0B2,#FFCC80);color:#2E2200}
