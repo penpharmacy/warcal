@@ -105,33 +105,23 @@ function distributeDose(totalWeekly) {
   // คำนวณขนาดยาเฉลี่ยต่อวัน (mg)
   const avgDailyDose = totalWeekly / dayCount;
 
-  // เริ่มจากให้เม็ด 3 mg เต็มจำนวนที่ใกล้เคียงเฉลี่ยก่อน (ปัดลงจำนวนเต็ม)
-  let daily3mgCount = Math.floor(avgDailyDose / 3);
-  // คำนวณขนาดยาที่เหลือที่ต้องเติมด้วย 2 mg
-  let leftoverMg = avgDailyDose - (daily3mgCount * 3);
-
-  // สำหรับแต่ละวัน จะมียา 3 mg เท่ากัน และยา 2 mg จะเป็น 0 หรือ 1 หรือ 2 เม็ด เพื่อเติมให้ใกล้เคียง
-  // เราแปลง leftoverMg ต่อวันเป็นจำนวนเม็ด 2 mg (ปัดเป็น 0, 1 หรือ 2 เม็ด)
-  // สร้าง array สำหรับจำนวนเม็ด 2 mg ของแต่ละวัน เพื่อให้ผลรวม 7 วัน ใกล้เคียง leftoverMg * 7
-  // โดยเริ่มแจก 1 เม็ด 2 mg ในแต่ละวันจนครบปริมาณที่ต้องการ
-
-  const leftoverTotal = leftoverMg * dayCount; // mg ที่ต้องเติมทั้งหมดในสัปดาห์ (จาก 2mg tablets)
-  let total2mgTabletsNeeded = Math.round(leftoverTotal / 2);
-
-  // สร้าง array จำนวนเม็ด 2 mg ในแต่ละวัน เริ่ม 0 ทั้งหมด
-  let daily2mgCounts = new Array(dayCount).fill(0);
-
-  // แจกเม็ด 2 mg ไปทีละเม็ดในวันแรก ๆ จนครบจำนวน
-  for (let i = 0; i < total2mgTabletsNeeded; i++) {
-    daily2mgCounts[i % dayCount] += 1;
-  }
-
-  // สร้างผลลัพธ์วันละ object
   const results = [];
 
   for (let i = 0; i < dayCount; i++) {
-    const n3 = daily3mgCount;        // เม็ด 3 mg ต่อวัน (จำนวนเต็ม)
-    const n2 = daily2mgCounts[i];    // เม็ด 2 mg ต่อวัน (0,1,2 ...)
+    // เริ่มจากให้เม็ด 3 mg เต็มจำนวนเต็มต่ำสุด (ปัดลง)
+    const n3 = Math.floor(avgDailyDose / 3);
+
+    // คำนวณขนาดยาที่เหลือเติมด้วย 2 mg
+    let leftover = avgDailyDose - (n3 * 3);
+
+    // ปัดเศษ leftover เป็น 0, 1, หรือ 2 เม็ด 2 mg ให้ใกล้เคียง leftover มากที่สุด
+    // เนื่องจากเม็ด 2 mg เป็นหน่วยเต็ม ๆ
+    let n2 = Math.round(leftover / 2);
+
+    // ป้องกันไม่ให้เกิน 2 เม็ด (ถ้าอยากเพิ่มได้มากกว่านี้ก็ปรับได้)
+    if (n2 < 0) n2 = 0;
+
+    // คำนวณขนาดยารวมจริงของวัน
     const totalDose = n3 * 3 + n2 * 2;
 
     results.push({
@@ -143,7 +133,6 @@ function distributeDose(totalWeekly) {
   }
 
   return results;
-
 }
 
-}
+
