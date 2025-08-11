@@ -4,8 +4,8 @@
   "description": "แอปคำนวณขนาดยา Warfarin ตามค่า INR (2mg และ 3mg)",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#2e86de",
+  "background_color": "#ff6b81",
+  "theme_color": "#ff4757",
   "orientation": "portrait",
   "icons": [
     {
