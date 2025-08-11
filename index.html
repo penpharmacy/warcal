@@ -206,44 +206,40 @@ function distributeDoseSinglePill(total, mg) {
 
 // แจกแจงเม็ดยาทั้ง 2 mg และ 3 mg
 function distributeDoseBothPills(total) {
-  let maxHalf3 = Math.floor(total / 1.5);
-  let bestCombo = null;
-  let bestDiff = Infinity;
+  // จำนวนเม็ด 3 mg เต็มเม็ดมากที่สุดก่อน (ปัดลง)
+  const maxPill3 = Math.floor(total / 3);
+  // ขนาดยาที่เหลือหลังใช้เม็ด 3 mg
+  const remainder = total - maxPill3 * 3;
+  // จำนวนเม็ด 2 mg เต็มเม็ดที่เติมให้ครบขนาดยา (ปัดขึ้น)
+  const pill2 = Math.round(remainder / 2);
 
-  for (let h3 = maxHalf3; h3 >= 0; h3--) {
-    let rem = total - h3 * 1.5;
-    let h2 = Math.round(rem / 1.0);
-    if (h2 < 0) h2 = 0;
+  // รวมขนาดยาที่ได้จริง
+  const totalDose = maxPill3 * 3 + pill2 * 2;
 
-    let totalDose = h3 * 1.5 + h2 * 1.0;
-    let diff = Math.abs(total - totalDose);
+  // กระจายเม็ด 3 mg ใน 7 วัน เท่า ๆ กัน บางวันอาจมี 1 เม็ดเพิ่ม
+  const base3 = Math.floor(maxPill3 / 7);
+  const rem3 = maxPill3 % 7;
 
-    if (diff < bestDiff) {
-      bestDiff = diff;
-      bestCombo = { h3, h2, totalDose };
-      if (diff === 0) break;
-    }
-  }
+  // กระจายเม็ด 2 mg ใน 7 วัน เท่า ๆ กัน บางวันอาจมี 1 เม็ดเพิ่ม
+  const base2 = Math.floor(pill2 / 7);
+  const rem2 = pill2 % 7;
 
   const results = [];
-  const perDayH3 = Math.floor(bestCombo.h3 / 7);
-  const remH3 = bestCombo.h3 % 7;
-  const perDayH2 = Math.floor(bestCombo.h2 / 7);
-  const remH2 = bestCombo.h2 % 7;
 
   for (let i = 0; i < 7; i++) {
-    let dayH3 = perDayH3 + (i < remH3 ? 1 : 0);
-    let dayH2 = perDayH2 + (i < remH2 ? 1 : 0);
+    let count3 = base3 + (i < rem3 ? 1 : 0);
+    let count2 = base2 + (i < rem2 ? 1 : 0);
 
     const pills = [];
-    for (let j = 0; j < dayH3; j++) pills.push(1.5); // ครึ่งเม็ด 3 mg
-    for (let j = 0; j < dayH2; j++) pills.push(1);   // ครึ่งเม็ด 2 mg
+    for (let j = 0; j < count3; j++) pills.push(3);
+    for (let j = 0; j < count2; j++) pills.push(2);
 
-    const totalDose = dayH3 * 1.5 + dayH2 * 1.0;
-    results.push({ totalDose, pills });
+    const dayDose = count3 * 3 + count2 * 2;
+    results.push({ totalDose: dayDose, pills });
   }
 
   return results;
+
 }
 
 function buildTable(dailyPlan) {
