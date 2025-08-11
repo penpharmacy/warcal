@@ -1,3 +1,5 @@
+// script.js
+
 const dayNames = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัส', 'ศุกร์', 'เสาร์', 'อาทิตย์'];
 
 document.getElementById('calculateBtn').addEventListener('click', calculateDose);
@@ -71,21 +73,10 @@ function calculateDose() {
       else if (p === 1.5) pills.push('<span class="pill pill-half-3mg"></span>');
     }
 
-    // แก้ไขการแสดงจำนวนเม็ดยาให้ถูกต้อง
-    const pillCounts = d.pills.reduce((acc, val) => {
-      acc[val] = (acc[val] || 0) + 1;
-      return acc;
-    }, {});
-    const pillTextArr = [];
-    if (pillCounts[3]) pillTextArr.push(`${pillCounts[3]} x 3 mg`);
-    if (pillCounts[2]) pillTextArr.push(`${pillCounts[2]} x 2 mg`);
-    if (pillCounts[1]) pillTextArr.push(`${pillCounts[1]} x 1 mg`);
-    if (pillCounts[1.5]) pillTextArr.push(`${pillCounts[1.5]} x 1.5 mg`);
-
     row.innerHTML = `
       <td>${dayNames[i]}</td>
       <td>${d.totalDose.toFixed(1)} mg</td>
-      <td>${pillTextArr.join(', ') || '-'}</td>
+      <td>${pills.map(p => p.includes('pill-2mg') ? '2' : '3').join(', ')} mg</td>
       <td><div class="day-pill">${pills.join('')}</div></td>
     `;
     table.appendChild(row);
@@ -108,49 +99,36 @@ function getAdjustment(inr, bleeding) {
 }
 
 function distributeDose(total) {
+  const dayDoses = [0, 0, 0, 0, 0, 0, 0];
+  const options = [3, 1.5, 2, 1]; // 3mg, 3mg ครึ่ง, 2mg, 2mg ครึ่ง
   const results = [];
 
-  // คำนวณจำนวนเม็ด 3 mg เต็มๆ ต่อสัปดาห์
-  let threeMgCount = Math.floor(total / 3);
+  let remaining = total;
 
-  // เศษที่เหลือหลังหัก 3 mg
-  let remainder = total - threeMgCount * 3;
-
-  // สร้างแผน 7 วัน โดยแต่ละวันมี pills และ totalDose เริ่มต้น 0
-  const dayPlan = Array(7).fill(null).map(() => ({ pills: [], totalDose: 0 }));
-
-  // แจกเม็ด 3 mg วันละ 1 เม็ด ตามจำนวนที่มี (ไม่เกิน 7 วัน)
-  for (let i = 0; i < 7 && threeMgCount > 0; i++) {
-    dayPlan[i].pills.push(3);
-    dayPlan[i].totalDose += 3;
-    threeMgCount--;
-  }
-
-  // จำนวนวันที่มียา 3 mg ตอนนี้
-  const daysWith3mg = dayPlan.filter(d => d.pills.includes(3)).length;
-
-  // จำนวนเม็ด 2 mg ที่ต้องแจกเต็มเม็ด (ปัดเศษใกล้เคียง)
-  let twoMgCount = Math.round(remainder / 2);
-
-  // แจกเม็ด 2 mg ในวันที่มียา 3 mg ก่อน
-  for (let i = 0; i < 7 && twoMgCount > 0; i++) {
-    if (dayPlan[i].pills.includes(3)) {
-      dayPlan[i].pills.push(2);
-      dayPlan[i].totalDose += 2;
-      twoMgCount--;
+  for (let i = 0; i < 7 && remaining > 0.9; i++) {
+    for (let p1 of options) {
+      if (p1 <= remaining + 0.1) {
+        dayDoses[i] = p1;
+        remaining -= p1;
+        break;
+      }
     }
   }
 
-  // หากเม็ด 2 mg ยังเหลือ และมีวันที่ไม่มี 3 mg แจกเม็ด 2 mg วันละ 1 เม็ด
-  for (let i = 0; i < 7 && twoMgCount > 0; i++) {
-    if (!dayPlan[i].pills.includes(3) && !dayPlan[i].pills.includes(2)) {
-      dayPlan[i].pills.push(2);
-      dayPlan[i].totalDose += 2;
-      twoMgCount--;
+  for (let d of dayDoses) {
+    const pills = [];
+    let left = d;
+    while (left >= 3) {
+      pills.push(3);
+      left -= 3;
     }
+    if (left >= 1.5) {
+      pills.push(1.5); left -= 1.5;
+    } else if (left >= 1.0 && left <= 1.6) {
+      pills.push(1); left -= 1;
+    }
+    results.push({ totalDose: d, pills });
   }
 
-  // ถ้ายังเหลือเม็ด 2 mg เกิน จะไม่ได้แจก (กรณีนี้ไม่รองรับ)
-
-  return dayPlan;
+  return results;
 }
