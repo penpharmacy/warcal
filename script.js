@@ -98,55 +98,52 @@ function getAdjustment(inr, bleeding) {
   return { percent: 0.15, text: "เพิ่มขนาดยา 10–20%" };
 }
 
-function distributeDose(total) {
+function distributeDose(totalWeekly) {
   const dayCount = 7;
-  const dayDoses = new Array(dayCount).fill({ n3: 0, n2: 0, totalDose: 0 });
-  
-  // หาเม็ด 3 mg มากที่สุดก่อน
-  let max3 = Math.floor(total / 3);
-  let remainder = total - max3 * 3;
+  const days = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัส', 'ศุกร์', 'เสาร์', 'อาทิตย์'];
 
-  // เติมเม็ด 2 mg สำหรับส่วนที่เหลือ
-  let max2 = Math.round(remainder / 2);
+  // คำนวณขนาดยาเฉลี่ยต่อวัน (mg)
+  const avgDailyDose = totalWeekly / dayCount;
 
-  // ถ้าจำนวนเม็ดยารวมเกิน 7 เม็ด ให้ลดเม็ด 3 mg ลงทีละเม็ด
-  while (max3 + max2 > dayCount) {
-    max3--;
-    remainder = total - max3 * 3;
-    max2 = Math.round(remainder / 2);
-    if (max3 < 0) {
-      max3 = 0;
-      break;
-    }
+  // เริ่มจากให้เม็ด 3 mg เต็มจำนวนที่ใกล้เคียงเฉลี่ยก่อน (ปัดลงจำนวนเต็ม)
+  let daily3mgCount = Math.floor(avgDailyDose / 3);
+  // คำนวณขนาดยาที่เหลือที่ต้องเติมด้วย 2 mg
+  let leftoverMg = avgDailyDose - (daily3mgCount * 3);
+
+  // สำหรับแต่ละวัน จะมียา 3 mg เท่ากัน และยา 2 mg จะเป็น 0 หรือ 1 หรือ 2 เม็ด เพื่อเติมให้ใกล้เคียง
+  // เราแปลง leftoverMg ต่อวันเป็นจำนวนเม็ด 2 mg (ปัดเป็น 0, 1 หรือ 2 เม็ด)
+  // สร้าง array สำหรับจำนวนเม็ด 2 mg ของแต่ละวัน เพื่อให้ผลรวม 7 วัน ใกล้เคียง leftoverMg * 7
+  // โดยเริ่มแจก 1 เม็ด 2 mg ในแต่ละวันจนครบปริมาณที่ต้องการ
+
+  const leftoverTotal = leftoverMg * dayCount; // mg ที่ต้องเติมทั้งหมดในสัปดาห์ (จาก 2mg tablets)
+  let total2mgTabletsNeeded = Math.round(leftoverTotal / 2);
+
+  // สร้าง array จำนวนเม็ด 2 mg ในแต่ละวัน เริ่ม 0 ทั้งหมด
+  let daily2mgCounts = new Array(dayCount).fill(0);
+
+  // แจกเม็ด 2 mg ไปทีละเม็ดในวันแรก ๆ จนครบจำนวน
+  for (let i = 0; i < total2mgTabletsNeeded; i++) {
+    daily2mgCounts[i % dayCount] += 1;
   }
 
-  // แจกแจงเม็ด 3 mg และ 2 mg เท่า ๆ กันใน 7 วัน
-  function distributeInt(units) {
-    const base = Math.floor(units / dayCount);
-    let rem = units % dayCount;
-    const arr = new Array(dayCount).fill(base);
-    for (let i = 0; i < rem; i++) arr[i]++;
-    return arr;
-  }
-
-  const arr3 = distributeInt(max3);
-  const arr2 = distributeInt(max2);
-
+  // สร้างผลลัพธ์วันละ object
   const results = [];
+
   for (let i = 0; i < dayCount; i++) {
-    const n3 = arr3[i];
-    const n2 = arr2[i];
+    const n3 = daily3mgCount;        // เม็ด 3 mg ต่อวัน (จำนวนเต็ม)
+    const n2 = daily2mgCounts[i];    // เม็ด 2 mg ต่อวัน (0,1,2 ...)
     const totalDose = n3 * 3 + n2 * 2;
+
     results.push({
-      totalDose,
-      pills: [].concat(
-        Array(n3).fill(3),
-        Array(n2).fill(2)
-      )
+      day: days[i],
+      n3,
+      n2,
+      totalDose
     });
   }
-  
+
   return results;
+
 }
 
 }
