@@ -98,41 +98,37 @@ function getAdjustment(inr, bleeding) {
   return { percent: 0.15, text: "เพิ่มขนาดยา 10–20%" };
 }
 
-function distributeDose(totalWeekly) {
-  const dayCount = 7;
-  const days = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัส', 'ศุกร์', 'เสาร์', 'อาทิตย์'];
-
-  // คำนวณขนาดยาเฉลี่ยต่อวัน (mg)
-  const avgDailyDose = totalWeekly / dayCount;
-
+function distributeDose(total) {
+  const dayDoses = [0, 0, 0, 0, 0, 0, 0];
+  const options = [3, 1.5, 2, 1]; // 3mg, 3mg ครึ่ง, 2mg, 2mg ครึ่ง
   const results = [];
 
-  for (let i = 0; i < dayCount; i++) {
-    // เริ่มจากให้เม็ด 3 mg เต็มจำนวนเต็มต่ำสุด (ปัดลง)
-    const n3 = Math.floor(avgDailyDose / 3);
+  let remaining = total;
 
-    // คำนวณขนาดยาที่เหลือเติมด้วย 2 mg
-    let leftover = avgDailyDose - (n3 * 3);
+  for (let i = 0; i < 7 && remaining > 0.9; i++) {
+    for (let p1 of options) {
+      if (p1 <= remaining + 0.1) {
+        dayDoses[i] = p1;
+        remaining -= p1;
+        break;
+      }
+    }
+  }
 
-    // ปัดเศษ leftover เป็น 0, 1, หรือ 2 เม็ด 2 mg ให้ใกล้เคียง leftover มากที่สุด
-    // เนื่องจากเม็ด 2 mg เป็นหน่วยเต็ม ๆ
-    let n2 = Math.round(leftover / 2);
-
-    // ป้องกันไม่ให้เกิน 2 เม็ด (ถ้าอยากเพิ่มได้มากกว่านี้ก็ปรับได้)
-    if (n2 < 0) n2 = 0;
-
-    // คำนวณขนาดยารวมจริงของวัน
-    const totalDose = n3 * 3 + n2 * 2;
-
-    results.push({
-      day: days[i],
-      n3,
-      n2,
-      totalDose
-    });
+  for (let d of dayDoses) {
+    const pills = [];
+    let left = d;
+    while (left >= 3) {
+      pills.push(3);
+      left -= 3;
+    }
+    if (left >= 1.5) {
+      pills.push(1.5); left -= 1.5;
+    } else if (left >= 1.0 && left <= 1.6) {
+      pills.push(1); left -= 1;
+    }
+    results.push({ totalDose: d, pills });
   }
 
   return results;
 }
-
-
