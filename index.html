@@ -1,9 +1,9 @@
-<!doctype html><!doctype html>
+<!doctype html>
 <html lang="th">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>เครื่องคำนวณการให้ยา Warfarin</title>
+  <title>เครื่องคำนวณการให้ยา Warfarin โรงพยาบาลพุนพิน</title>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     :root{
@@ -35,8 +35,7 @@
 <body>
   <div class="container">
     <header class="card" style="align-items:center">
-      
-      <h1>เครื่องคำนวณการให้ยา Warfarin</h1>
+      <h1>เครื่องคำนวณการให้ยา Warfarin โรงพยาบาลพุนพิน</h1>
     </header>
 
     <section class="card">
@@ -103,140 +102,53 @@
       return arr;
     }
 
-   // คำนวณการแจกเม็ดยา 3 mg และ 2 mg (รวมครึ่งเม็ดได้)
-function findBestCombo(target) {
-  // แปลง mg เป็น half units (3 mg ครึ่ง = 1.5 mg = 1 half unit)
-  // half unit 3 mg = 1.5 mg
-  // half unit 2 mg = 1 mg
-  // จะลองครึ่งเม็ด 3 mg (1.5 mg units) สูงสุด 60 half unit (90 mg)
-  // ครึ่งเม็ด 2 mg สูงสุด 80 half unit (80 mg)
-  let best = null;
-  let bestDiff = Infinity;
-
-  for (let h3 = 0; h3 <= 60; h3++) {
-    const mg3 = h3 * 1.5;
-    let rem = target - mg3;
-    if (rem < -10) continue;
-
-    // ประมาณจำนวนครึ่งเม็ด 2 mg
-    const estH2 = Math.round(rem / 1);
-    const start = Math.max(0, estH2 - 6);
-    const end = Math.min(80, estH2 + 6);
-
-    for (let h2 = start; h2 <= end; h2++) {
-      const total = mg3 + h2 * 1;
-      const diff = Math.abs(total - target);
-      if (
-        diff < bestDiff - 1e-9 ||
-        (Math.abs(diff - bestDiff) < 1e-9 && h3 > (best?.h3 || 0))
-      ) {
-        bestDiff = diff;
-        best = { h3, h2, total };
-        if (bestDiff < 0.01) return best;
+    function findBestCombo(target){
+      // โหมด 2+3 mg
+      if(target % 5 === 0){
+        let num5 = target / 5;
+        if(num5 <=7){
+          return {h3:num5*2,h2:num5*2,total:num5*5};
+        }
+        const sets = Math.floor(num5 / 4);
+        const rem = num5 % 4;
+        const h3 = sets*4 + Math.min(rem*2, rem*2);
+        const h2 = sets*4 + Math.max(0, rem*2 - h3);
+        return {h3:h3,h2:h2,total:target};
       }
-    }
-  }
-  return best;
-}
 
-// ฟังก์ชันกระจายเม็ดยาใน 7 วัน ให้มียาร่วมกันอย่างน้อย 1 วัน
-function buildDailyPlan(combo) {
-  const dayNames = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัส', 'ศุกร์', 'เสาร์', 'อาทิตย์'];
-  let { h3, h2 } = combo; // half units
-
-  // กระจาย 3 mg (1 half unit = 1.5 mg) และ 2 mg (1 half unit = 1 mg) แบบกระจายเท่าๆ กัน
-  // ขั้นแรก แจกเต็มเม็ด 3 mg วันละ 1 เม็ด (2 half unit) จนครบ h3
-  // แต่ h3 คือ half units ของ 3 mg ครึ่งเม็ด (1.5 mg)
-  // ดังนั้นจำนวนเม็ดเต็ม = Math.floor(h3/2), ครึ่งเม็ด = h3 % 2
-
-  // แปลง h3 เป็นจำนวนเม็ดเต็มและครึ่งเม็ด
-  const full3 = Math.floor(h3 / 2);
-  const half3 = h3 % 2; // 0 หรือ 1
-
-  // แปลง h2 เป็นจำนวนเม็ดเต็มและครึ่งเม็ด
-  const full2 = Math.floor(h2 / 2);
-  const half2 = h2 % 2; // 0 หรือ 1
-
-  // กระจายเม็ดเต็ม 3 mg ใน 7 วัน (เต็มเม็ดก่อน)
-  const daily3 = Array(7).fill(0);
-  for (let i = 0; i < full3 && i < 7; i++) daily3[i] += 2; // 2 half unit = 1 เม็ดเต็ม
-
-  // กระจายครึ่งเม็ด 3 mg วันถัดไป (ถ้ามี)
-  if (half3 === 1) {
-    for (let i = 0; i < 7; i++) {
-      if (daily3[i] === 0) {
-        daily3[i] = 1;
-        break;
+      // กรณีอื่น → แจก 5 mg ให้มากที่สุด แล้วเกลี่ยส่วนที่เหลือ
+      let best = null;
+      let max5 = Math.floor(target / 5);
+      for(let n5=max5;n5>=0;n5--){
+        let rem = target - n5*5;
+        let n3 = Math.floor(rem / 3);
+        let n2 = Math.round((rem - n3*3)/2);
+        if(n3 + n2 === 0) continue;
+        let total = n5*5 + n3*3 + n2*2;
+        let diff = Math.abs(total - target);
+        if(!best || diff < Math.abs(best.total - target)){
+          best = {h3: n5*2 + n3*2, h2: n5*2 + n2*2, total: total};
+        }
+        if(diff < 0.01) break;
       }
+      return best;
     }
-  }
 
-  // กระจายเม็ดเต็ม 2 mg ใน 7 วัน
-  const daily2 = Array(7).fill(0);
-  for (let i = 0; i < full2 && i < 7; i++) daily2[i] += 2;
-
-  // กระจายครึ่งเม็ด 2 mg วันถัดไป (ถ้ามี)
-  if (half2 === 1) {
-    for (let i = 0; i < 7; i++) {
-      if (daily2[i] === 0) {
-        daily2[i] = 1;
-        break;
+    function buildPlanHTML(title, combo){
+      const h3 = combo.h3; const h2 = combo.h2; const total = combo.total;
+      const perDay3 = distributeEvenly(h3,7);
+      const perDay2 = distributeEvenly(h2,7);
+      let html = `<h4>${title} — รวม ${total.toFixed(1)} mg/สัปดาห์</h4>`;
+      html += `<table><thead><tr><th>วัน</th><th>3 mg (เม็ด)</th><th>2 mg (เม็ด)</th><th>รวม (mg)</th></tr></thead><tbody>`;
+      const dayNames = ['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์','อาทิตย์'];
+      for(let i=0;i<7;i++){
+        const t3 = perDay3[i]/2;
+        const t2 = perDay2[i]/2;
+        const mg = t3*3 + t2*2;
+        html += `<tr><td>${dayNames[i]}</td><td>${t3 % 1 === 0 ? t3 : t3.toFixed(1)}</td><td>${t2 % 1 === 0 ? t2 : t2.toFixed(1)}</td><td>${mg.toFixed(1)}</td></tr>`;
       }
-    }
-  }
-
-  // ตรวจสอบอย่างน้อย 1 วันมียาทั้ง 3 mg และ 2 mg พร้อมกันหรือไม่
-  const hasBoth = daily3.some((v, i) => v > 0 && daily2[i] > 0);
-
-  if (!hasBoth) {
-    // หา index ที่มียา 3 mg เต็มเม็ดหรือครึ่งเม็ด
-    const idx3 = daily3.findIndex(v => v > 0);
-    // หา index ที่มียา 2 mg เต็มเม็ดหรือครึ่งเม็ด
-    const idx2 = daily2.findIndex(v => v > 0);
-
-    if (idx3 !== -1 && idx2 !== -1 && idx3 !== idx2) {
-      // ย้ายยา 2 mg จาก idx2 ไป idx3 เพื่อรวมกัน
-      daily2[idx3] += daily2[idx2];
-      daily2[idx2] = 0;
-    }
-  }
-
-  // แปลงจาก half units เป็นจำนวนเม็ด (เต็ม=2 half units, ครึ่ง=1 half unit)
-  const result = [];
-  for (let i = 0; i < 7; i++) {
-    let pills3 = 0,
-      pills3half = 0,
-      pills2 = 0,
-      pills2half = 0;
-
-    if (daily3[i] >= 2) {
-      pills3 = Math.floor(daily3[i] / 2);
-      if (daily3[i] % 2 !== 0) pills3half = 1;
-    } else if (daily3[i] === 1) {
-      pills3half = 1;
-    }
-
-    if (daily2[i] >= 2) {
-      pills2 = Math.floor(daily2[i] / 2);
-      if (daily2[i] % 2 !== 0) pills2half = 1;
-    } else if (daily2[i] === 1) {
-      pills2half = 1;
-    }
-
-    const totalDose = pills3 * 3 + pills3half * 1.5 + pills2 * 2 + pills2half * 1;
-    result.push({
-      day: dayNames[i],
-      pills3,
-      pills3half,
-      pills2,
-      pills2half,
-      totalDose,
-    });
-  }
-
-  return result;
-}
-
+      html += `</tbody></table>`;
+      return html;
     }
 
     document.getElementById('calcBtn').addEventListener('click', ()=>{
@@ -301,7 +213,6 @@ function buildDailyPlan(combo) {
           plansDiv.innerHTML += buildPlanHTML(t.k, best);
         });
 
-        // คำนวณสรุปสำหรับช่วงนัด
         const min3 = summaryData.min.h3 / 2 * (days / 7);
         const min2 = summaryData.min.h2 / 2 * (days / 7);
         const max3 = summaryData.max.h3 / 2 * (days / 7);
@@ -324,3 +235,4 @@ function buildDailyPlan(combo) {
   </script>
 </body>
 </html>
+
