@@ -149,19 +149,35 @@ function calculate(){
   const bleed = document.querySelector('input[name="bleed"]:checked').value;
   if(isNaN(inr)||isNaN(weeklyDose)||isNaN(days)){return}
 
+  const resDiv = document.getElementById('results');
+  const tables = document.getElementById('tables');
+  const plansDiv = document.getElementById('plans');
+  const summaryDiv = document.getElementById('summary');
+
+  // ---------- กรณีเลือดออก ----------
+  if(bleed === 'yes'){
+    resDiv.innerHTML = `<div class="card"><p><strong>คำแนะนำ:</strong> พบภาวะเลือดออก: ให้ Vit K1 และพิจารณาการรักษาเฉียบพลันตามข้อแนะนำทางการแพทย์</p></div>`;
+    resDiv.style.display = 'block';
+    tables.style.display = 'none';  // ไม่แสดงตารางใดๆ
+    plansDiv.innerHTML = '';
+    summaryDiv.innerHTML = '';
+    return;  // จบฟังก์ชัน ไม่คำนวณค่า Warfarin
+  }
+
+  // ---------- ส่วนคำนวณปกติ ----------
   let adj = {minPct:0,maxPct:0,avgPct:0,note:''};
   if(inr < 1.5){adj.minPct = 0.10; adj.maxPct = 0.20; adj.avgPct = 0.15; adj.note='เพิ่มขนาดยารายสัปดาห์ 10–20%';}
   else if(inr >=1.5 && inr <=1.9){adj.minPct = 0.05; adj.maxPct = 0.10; adj.avgPct = 0.075; adj.note='เพิ่ม 5–10% หรือพิจารณาไม่ปรับ แต่ติดตาม INR บ่อยขึ้น';}
   else if(inr >=2.0 && inr <=3.0){adj.minPct = 0; adj.maxPct = 0; adj.avgPct = 0; adj.note='ไม่ต้องปรับยา';}
   else if(inr >=3.1 && inr <=3.9){adj.minPct = -0.10; adj.maxPct = -0.05; adj.avgPct = -0.075; adj.note='ลดขนาดยารายสัปดาห์ 5–10%';}
-  else if(inr >3.9 && inr <5.0 && bleed==='no'){adj.minPct = -0.10; adj.maxPct = -0.10; adj.avgPct = -0.10; adj.note='หยุดยา 1 วัน แล้วกลับมาเริ่มด้วยขนาดที่ลดลง 10%';}
-  else if(inr >=5.0 && inr <9.0 && bleed==='no'){adj.minPct = -0.20; adj.maxPct = -0.20; adj.avgPct = -0.20; adj.note='หยุดยา 2 วัน แล้วกลับมาเริ่มด้วยขนาดที่ลดลง 20% — พิจารณาให้ Vitamin K₁ 1–2.5 mg ถ้ามีความเสี่ยงเลือดออก';}
-  else if(inr >= 9.0 && bleed==='no'){adj.minPct = null; adj.maxPct = null; adj.avgPct = null; adj.note='INR > 9.0: หยุดยา ให้ Vitamin K₁ 2.5–5 mg รับประทาน และติดตาม INR อย่างใกล้ชิด — ปรึกษาแพทย์/เภสัชกรเพื่อการปรับยา';}
-  if(bleed==='yes'){adj.note = 'พบภาวะเลือดออก: ให้ Vit K1 และพิจารณาการรักษาเฉียบพลันตามข้อแนะนำทางการแพทย์';}
+  else if(inr >3.9 && inr <5.0){adj.minPct = -0.10; adj.maxPct = -0.10; adj.avgPct = -0.10; adj.note='หยุดยา 1 วัน แล้วกลับมาเริ่มด้วยขนาดที่ลดลง 10%';}
+  else if(inr >=5.0 && inr <9.0){adj.minPct = -0.20; adj.maxPct = -0.20; adj.avgPct = -0.20; adj.note='หยุดยา 2 วัน แล้วกลับมาเริ่มด้วยขนาดที่ลดลง 20% — พิจารณาให้ Vitamin K₁ 1–2.5 mg ถ้ามีความเสี่ยงเลือดออก';}
+  else if(inr >= 9.0){adj.minPct = null; adj.maxPct = null; adj.avgPct = null; adj.note='INR > 9.0: หยุดยา ให้ Vitamin K₁ 2.5–5 mg รับประทาน และติดตาม INR อย่างใกล้ชิด — ปรึกษาแพทย์/เภสัชกรเพื่อการปรับยา';}
 
   let newRange = {};
-  if(adj.minPct===null){ newRange.note = 'ไม่แนะนำให้คำนวณขนาดยาอัตโนมัติสำหรับ INR >= 9.0 — ให้ผู้เชี่ยวชาญประเมิน'; }
-  else{
+  if(adj.minPct===null){ 
+    newRange.note = 'ไม่แนะนำให้คำนวณขนาดยาอัตโนมัติสำหรับ INR >= 9.0 — ให้ผู้เชี่ยวชาญประเมิน'; 
+  } else{
     const min = weeklyDose * (1 + adj.minPct);
     const max = weeklyDose * (1 + adj.maxPct);
     const avg = weeklyDose * (1 + adj.avgPct);
@@ -175,7 +191,6 @@ function calculate(){
     };
   }
 
-  const resDiv = document.getElementById('results');
   let html = `<div class="card">`;
   html += `<p><strong>คำแนะนำ:</strong> INR = ${inr.toFixed(2)} — ${adj.note}</p>`;
   if(newRange.note){ html += `<p class="note">${newRange.note}</p>`; }
@@ -183,14 +198,12 @@ function calculate(){
     html += `<p>ขนาดยาใหม่ต่อสัปดาห์ (mg) [คำนวณจริง]: <strong>${newRange.minCalc} — ${newRange.maxCalc}</strong> (เฉลี่ย ${newRange.avgCalc} mg)</p>`;
   }
   html += `</div>`;
-  resDiv.innerHTML = html; resDiv.style.display='block';
+  resDiv.innerHTML = html; 
+  resDiv.style.display='block';
 
-  const tables = document.getElementById('tables');
-  const plansDiv = document.getElementById('plans');
-  const summaryDiv = document.getElementById('summary');
+  // ---------- สร้างตาราง Warfarin ----------
   plansDiv.innerHTML = '';
   summaryDiv.innerHTML = '';
-
   if(newRange.min !== undefined){
     const targets = [
       {k:'ต่ำสุด',val:newRange.min},
@@ -240,7 +253,7 @@ function calculate(){
   }
 }
 
-// -------------------- Event listeners for auto-calc --------------------
+// -------------------- Event listeners --------------------
 document.querySelectorAll('input[name="pills"]').forEach(el=>el.addEventListener('change', calculate));
 document.querySelectorAll('input[name="bleed"]').forEach(el=>el.addEventListener('change', calculate));
 document.getElementById('inr').addEventListener('input', calculate);
@@ -252,4 +265,3 @@ calculate();
 </script>
 </body>
 </html>
-
