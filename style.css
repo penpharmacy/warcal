@@ -1,5 +1,17 @@
 /* style.css */
-
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url("logo.png") no-repeat center center;
+    background-size: 200px; /* ปรับขนาดลายน้ำ */
+    opacity: 0.08; /* ปรับความโปร่งใส (0 = โปร่งใส, 1 = ทึบ) */
+    z-index: -1; /* อยู่ด้านหลังเนื้อหา */
+    pointer-events: none; /* ไม่ให้ลายน้ำบังการกดปุ่ม */
+}
 body {
   font-family: 'Sarabun', sans-serif;
   background-color: #fff0f5;
