@@ -173,7 +173,15 @@
         const min = weeklyDose * (1 + adj.minPct);
         const max = weeklyDose * (1 + adj.maxPct);
         const avg = weeklyDose * (1 + adj.avgPct);
-        newRange = {min: roundHalf(min*2)/2, max: roundHalf(max*2)/2, avg: roundHalf(avg*2)/2};
+        // คำนวณจริง + ปัดเพื่อสั่งยา
+        newRange = {
+          minCalc: parseFloat(min.toFixed(1)),
+          maxCalc: parseFloat(max.toFixed(1)),
+          avgCalc: parseFloat(avg.toFixed(1)),
+          min: roundHalf(min*2)/2,
+          max: roundHalf(max*2)/2,
+          avg: roundHalf(avg*2)/2
+        };
       }
 
       const resDiv = document.getElementById('results');
@@ -181,7 +189,8 @@
       html += `<p><strong>คำแนะนำ:</strong> INR = ${inr.toFixed(2)} — ${adj.note}</p>`;
       if(newRange.note){ html += `<p class="note">${newRange.note}</p>`; }
       else{
-        html += `<p>ขนาดยาใหม่ต่อสัปดาห์ (mg): <strong>${newRange.min.toFixed(1)} — ${newRange.max.toFixed(1)}</strong> (เฉลี่ย ${newRange.avg.toFixed(1)} mg)</p>`;
+        html += `<p>ขนาดยาใหม่ต่อสัปดาห์ (mg) [คำนวณจริง]: <strong>${newRange.minCalc} — ${newRange.maxCalc}</strong> (เฉลี่ย ${newRange.avgCalc} mg)</p>`;
+       // html += `<p class="small">จำนวนเม็ดจริงที่ควรจ่าย (ปัด 0.5 mg สำหรับเม็ด): ต่ำสุด ${newRange.min}, เฉลี่ย ${newRange.avg}, สูงสุด ${newRange.max}</p>`;
       }
       html += `</div>`;
       resDiv.innerHTML = html; resDiv.style.display='block';
