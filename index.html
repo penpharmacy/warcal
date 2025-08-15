@@ -193,7 +193,7 @@ function calculate(){
   else if(inr >=2.0 && inr <=3.0){adj.minPct = 0; adj.maxPct = 0; adj.avgPct = 0; adj.note='ไม่ต้องปรับยา';}
   else if(inr >=3.1 && inr <=3.9){adj.minPct = -0.10; adj.maxPct = -0.05; adj.avgPct = -0.075; adj.note='ลดขนาดยารายสัปดาห์ 5–10%';}
   else if(inr >3.9 && inr <5.0){adj.minPct = -0.10; adj.maxPct = -0.10; adj.avgPct = -0.10; adj.note='หยุดยา 1 วัน แล้วกลับมาเริ่มด้วยขนาดที่ลดลง 10%';}
-  else if(inr >=5.0 && inr <9.0){adj.minPct = -0.20; adj.maxPct = -0.20; adj.avgPct = -0.20; adj.note='หยุดยา 2 วัน แล้วกลับมาเริ่มด้วยขนาดที่ลดลง 20% — พิจารณาให้ Vitamin K₁ 1–2.5 mg ถ้ามีความเสี่ยงเลือดออก';}
+  else if(inr >=5.0 && inr <9.0){adj.minPct = -0.20; adj.maxPct = -0.20; adj.avgPct = -0.20; adj.note='หยุดยา 2 วัน แล้วกลับมาเริ่มด้วยขนาดที่ลดลง 20% — พิจารณาให้ Vitamin K₁ 1–2.5 mg รับประทาน ถ้ามีความเสี่ยงเลือดออก';}
   else if(inr >= 9.0){adj.minPct = null; adj.maxPct = null; adj.avgPct = null; adj.note='INR > 9.0: หยุดยา ให้ Vitamin K₁ 2.5–5 mg รับประทาน และติดตาม INR อย่างใกล้ชิด — ปรึกษาแพทย์/เภสัชกรเพื่อการปรับยา';}
 
   let newRange = {};
