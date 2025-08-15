@@ -217,7 +217,7 @@ function calculate(){
   html += `<p><strong>คำแนะนำ:</strong> INR = ${inr.toFixed(2)} — ${adj.note}</p>`;
   if(newRange.note){ html += `<p class="note">${newRange.note}</p>`; }
   else{
-    html += `<p>ขนาดยาใหม่ต่อสัปดาห์ (mg) [คำนวณจริง]: <strong>${newRange.minCalc} — ${newRange.maxCalc}</strong> (เฉลี่ย ${newRange.avgCalc} mg)</p>`;
+    html += `<p>ขนาดยาใหม่ต่อสัปดาห์ (mg) : <strong>${newRange.minCalc} — ${newRange.maxCalc}</strong> (เฉลี่ย ${newRange.avgCalc} mg)</p>`;
   }
   html += `</div>`;
   resDiv.innerHTML = html; 
