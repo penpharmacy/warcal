@@ -103,7 +103,6 @@
     }
 
     function findBestCombo(target){
-      // โหมด 2+3 mg
       if(target % 5 === 0){
         let num5 = target / 5;
         if(num5 <=7){
@@ -116,7 +115,6 @@
         return {h3:h3,h2:h2,total:target};
       }
 
-      // กรณีอื่น → แจก 5 mg ให้มากที่สุด แล้วเกลี่ยส่วนที่เหลือ
       let best = null;
       let max5 = Math.floor(target / 5);
       for(let n5=max5;n5>=0;n5--){
@@ -195,8 +193,12 @@
       summaryDiv.innerHTML = '';
 
       if(newRange.min !== undefined){
-        const targets = [ {k:'ต่ำสุด',val:newRange.min}, {k:'เฉลี่ย',val:newRange.avg}, {k:'สูงสุด',val:newRange.max} ];
-        let summaryData = {min:{},max:{}};
+        const targets = [
+          {k:'ต่ำสุด',val:newRange.min},
+          {k:'เฉลี่ย',val:newRange.avg},
+          {k:'สูงสุด',val:newRange.max}
+        ];
+        let summaryData = {min:{},avg:{},max:{}};
         targets.forEach(t=>{
           let best;
           if(pillChoice === '3'){
@@ -209,21 +211,27 @@
             best = findBestCombo(t.val);
           }
           if(t.k==='ต่ำสุด'){summaryData.min=best;}
+          if(t.k==='เฉลี่ย'){summaryData.avg=best;}
           if(t.k==='สูงสุด'){summaryData.max=best;}
           plansDiv.innerHTML += buildPlanHTML(t.k, best);
         });
 
         const min3 = summaryData.min.h3 / 2 * (days / 7);
         const min2 = summaryData.min.h2 / 2 * (days / 7);
+        const avg3 = summaryData.avg.h3 / 2 * (days / 7);
+        const avg2 = summaryData.avg.h2 / 2 * (days / 7);
         const max3 = summaryData.max.h3 / 2 * (days / 7);
         const max2 = summaryData.max.h2 / 2 * (days / 7);
+
         const totalMinMg = summaryData.min.total * (days / 7);
+        const totalAvgMg = summaryData.avg.total * (days / 7);
         const totalMaxMg = summaryData.max.total * (days / 7);
 
         summaryDiv.innerHTML = `สำหรับช่วงนัด ${days} วัน\n\n`+
           `ต่ำสุด: ต้องใช้รวม ${min3.toFixed(1)} เม็ด(3 mg) และ ${min2.toFixed(1)} เม็ด(2 mg) -> จำนวนเม็ดจริงที่ควรจ่าย (ปัดขึ้น): ${Math.ceil(min3)} เม็ด(3 mg), ${Math.ceil(min2)} เม็ด(2 mg).\n\n`+
+          `เฉลี่ย: ต้องใช้รวม ${avg3.toFixed(1)} เม็ด(3 mg) และ ${avg2.toFixed(1)} เม็ด(2 mg) -> จำนวนเม็ดจริงที่ควรจ่าย (ปัดขึ้น): ${Math.ceil(avg3)} เม็ด(3 mg), ${Math.ceil(avg2)} เม็ด(2 mg).\n\n`+
           `สูงสุด: ต้องใช้รวม ${max3.toFixed(1)} เม็ด(3 mg) และ ${max2.toFixed(1)} เม็ด(2 mg) -> จำนวนเม็ดจริงที่ควรจ่าย (ปัดขึ้น): ${Math.ceil(max3)} เม็ด(3 mg), ${Math.ceil(max2)} เม็ด(2 mg).\n\n`+
-          `ปริมาณรวม (mg): ต่ำสุด ${totalMinMg.toFixed(1)} mg, สูงสุด ${totalMaxMg.toFixed(1)} mg.`;
+          `ปริมาณรวม (mg): ต่ำสุด ${totalMinMg.toFixed(1)} mg, เฉลี่ย ${totalAvgMg.toFixed(1)} mg, สูงสุด ${totalMaxMg.toFixed(1)} mg.`;
 
         summaryDiv.classList.add('note');
         tables.style.display = 'block';
