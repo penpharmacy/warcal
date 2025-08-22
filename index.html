@@ -146,18 +146,18 @@ function findBestCombo(target){
   }
   return best;
 }
-function buildPlanHTML(title, combo){
+function buildPlanHTML(title, combo, percentText){
   const h3 = combo.h3; const h2 = combo.h2; const total = combo.total;
   const perDay3 = distributeEvenly(h3,7);
   const perDay2 = distributeEvenly(h2,7);
-  let html = `<h4>${title} — รวม ${total.toFixed(1)} mg/สัปดาห์</h4>`;
+  let html = `<h4>${title} — รวม ${total.toFixed(2)} mg/สัปดาห์ ${percentText ? `(${percentText})` : ''}</h4>`;
   html += `<table><thead><tr><th>วัน</th><th>3 mg (เม็ด)</th><th>2 mg (เม็ด)</th><th>รวม (mg)</th></tr></thead><tbody>`;
   const dayNames = ['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์','อาทิตย์'];
   for(let i=0;i<7;i++){
     const t3 = perDay3[i]/2;
     const t2 = perDay2[i]/2;
     const mg = t3*3 + t2*2;
-    html += `<tr><td>${dayNames[i]}</td><td>${t3 % 1 === 0 ? t3 : t3.toFixed(1)}</td><td>${t2 % 1 === 0 ? t2 : t2.toFixed(1)}</td><td>${mg.toFixed(1)}</td></tr>`;
+    html += `<tr><td>${dayNames[i]}</td><td>${t3 % 1 === 0 ? t3 : t3.toFixed(2)}</td><td>${t2 % 1 === 0 ? t2 : t2.toFixed(2)}</td><td>${mg.toFixed(2)}</td></tr>`;
   }
   html += `</tbody></table>`;
   return html;
@@ -204,9 +204,9 @@ function calculate(){
     const max = weeklyDose * (1 + adj.maxPct);
     const avg = weeklyDose * (1 + adj.avgPct);
     newRange = {
-      minCalc: parseFloat(min.toFixed(1)),
-      maxCalc: parseFloat(max.toFixed(1)),
-      avgCalc: parseFloat(avg.toFixed(1)),
+      minCalc: parseFloat(min.toFixed(2)),
+      maxCalc: parseFloat(max.toFixed(2)),
+      avgCalc: parseFloat(avg.toFixed(2)),
       min: roundHalf(min*2)/2,
       max: roundHalf(max*2)/2,
       avg: roundHalf(avg*2)/2
@@ -217,7 +217,7 @@ function calculate(){
   html += `<p><strong>คำแนะนำ:</strong> INR = ${inr.toFixed(2)} — ${adj.note}</p>`;
   if(newRange.note){ html += `<p class="note">${newRange.note}</p>`; }
   else{
-    html += `<p>ขนาดยาใหม่ต่อสัปดาห์ (mg) : <strong>${newRange.minCalc} — ${newRange.maxCalc}</strong> (เฉลี่ย ${newRange.avgCalc} mg)</p>`;
+    html += `<p>ขนาดยาใหม่ต่อสัปดาห์ (mg) : <strong>${newRange.minCalc.toFixed(2)} — ${newRange.maxCalc.toFixed(2)}</strong> (เฉลี่ย ${newRange.avgCalc.toFixed(2)} mg)</p>`;
   }
   html += `</div>`;
   resDiv.innerHTML = html; 
@@ -228,9 +228,9 @@ function calculate(){
   summaryDiv.innerHTML = '';
   if(newRange.min !== undefined){
     const targets = [
-      {k:'ต่ำสุด',val:newRange.min},
-      {k:'เฉลี่ย',val:newRange.avg},
-      {k:'สูงสุด',val:newRange.max}
+       {k:'ต่ำสุด', val:newRange.min, pct:adj.minPct},
+       {k:'เฉลี่ย', val:newRange.avg, pct:adj.avgPct},
+       {k:'สูงสุด', val:newRange.max, pct:adj.maxPct}
     ];
     let summaryData = {min:{},avg:{},max:{}};
     targets.forEach(t=>{
@@ -247,7 +247,11 @@ function calculate(){
       if(t.k==='ต่ำสุด'){summaryData.min=best;}
       if(t.k==='เฉลี่ย'){summaryData.avg=best;}
       if(t.k==='สูงสุด'){summaryData.max=best;}
-      plansDiv.innerHTML += buildPlanHTML(t.k, best);
+    //  const pctText = t.pct === 0 ? '±0%' : (t.pct > 0 ? `+${(t.pct*100).toFixed(0)}%` : `${(t.pct*100).toFixed(0)}%`);
+// เปอร์เซ็นต์การเปลี่ยนแปลงจริง
+      const diffPct = weeklyDose === 0 ? 0 : ((best.total - weeklyDose) / weeklyDose) * 100;
+      const pctText = diffPct > 0 ? `+${diffPct.toFixed(2)}%` : `${diffPct.toFixed(2)}%`;
+plansDiv.innerHTML += buildPlanHTML(t.k, best, pctText);
     });
 
     const min3 = summaryData.min.h3 / 2 * (days / 7);
@@ -265,7 +269,7 @@ function calculate(){
       `ต่ำสุด: ต้องใช้รวม ${min3.toFixed(1)} เม็ด(3 mg) และ ${min2.toFixed(1)} เม็ด(2 mg) -> จำนวนเม็ดจริงที่ควรจ่าย (ปัดขึ้น): ${Math.ceil(min3)} เม็ด(3 mg), ${Math.ceil(min2)} เม็ด(2 mg).\n\n`+
       `เฉลี่ย: ต้องใช้รวม ${avg3.toFixed(1)} เม็ด(3 mg) และ ${avg2.toFixed(1)} เม็ด(2 mg) -> จำนวนเม็ดจริงที่ควรจ่าย (ปัดขึ้น): ${Math.ceil(avg3)} เม็ด(3 mg), ${Math.ceil(avg2)} เม็ด(2 mg).\n\n`+
       `สูงสุด: ต้องใช้รวม ${max3.toFixed(1)} เม็ด(3 mg) และ ${max2.toFixed(1)} เม็ด(2 mg) -> จำนวนเม็ดจริงที่ควรจ่าย (ปัดขึ้น): ${Math.ceil(max3)} เม็ด(3 mg), ${Math.ceil(max2)} เม็ด(2 mg).\n\n`+
-      `ปริมาณรวม (mg): ต่ำสุด ${totalMinMg.toFixed(1)} mg, เฉลี่ย ${totalAvgMg.toFixed(1)} mg, สูงสุด ${totalMaxMg.toFixed(1)} mg.`;
+      `ปริมาณรวม (mg): ต่ำสุด ${totalMinMg.toFixed(2)} mg, เฉลี่ย ${totalAvgMg.toFixed(2)} mg, สูงสุด ${totalMaxMg.toFixed(2)} mg.`;
 
     summaryDiv.classList.add('note');
     tables.style.display = 'block';
