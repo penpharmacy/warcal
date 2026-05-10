@@ -532,13 +532,34 @@ function calculate(){
    const tables = document.getElementById('tables');
    const plansDiv = document.getElementById('plans');
 
-   if(bleed==='yes'){
-     resDiv.innerHTML = `<div class="card"><p><strong>คำแนะนำ:</strong> พบภาวะเลือดออก: ให้ Vit K1 และพิจารณาการรักษาเฉียบพลันตามข้อแนะนำทางการแพทย์</p></div>`;
-     resDiv.style.display='block';
-     tables.style.display='none';
-     plansDiv.innerHTML='';
-     return;
-   }
+if(bleed === 'yes') {
+
+    // ซ่อนตารางทั้งหมด
+    tables.style.display = 'none';
+
+    // ล้างตารางเดิม
+    plansDiv.innerHTML = '';
+
+    // แสดงข้อความเตือนเลือดออก
+    resDiv.innerHTML = `
+        <div class="note" style="
+            background:#ffebee;
+            color:#b71c1c;
+            border:1px solid #ef9a9a;
+            padding:16px;
+            border-radius:12px;
+            font-size:16px;
+            font-weight:600;
+        ">
+            ⚠️ พบภาวะเลือดออก<br>
+            ให้ Vitamin K₁ และพิจารณาการรักษาเฉียบพลันตามข้อแนะนำทางการแพทย์
+        </div>
+    `;
+
+    resDiv.style.display = 'block';
+
+    return;
+}
     let adj = {minPct:0,maxPct:0,avgPct:0,note:''};
    if(inr < 1.5){adj.minPct=0.10;adj.maxPct=0.20;adj.avgPct=0.15;adj.note='เพิ่มขนาดยารายสัปดาห์ 10–20%';}
    else if(inr>=1.5 && inr<=1.9){adj.minPct=0.05;adj.maxPct=0.10;adj.avgPct=0.075;adj.note='เพิ่ม 5–10% หรือพิจารณาไม่ปรับ แต่ติดตาม INR บ่อยขึ้น';}
