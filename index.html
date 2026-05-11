@@ -1283,13 +1283,15 @@ if (bleed === 'yes') {
 
 } else {
 
-    html = `
-        <div class="card">
-            <p>
-                <strong>คำแนะนำ:</strong>
-                INR = ${inr.toFixed(2)} — ${adj.note}
-            </p>
-    `;
+   html = `
+    <div class="card">
+        <p>
+            <strong>คำแนะนำ:</strong>
+            INR = ${inr.toFixed(2)}
+            <span style="color:#E53935;font-weight:700;">➜</span>
+            ${adj.note}
+        </p>
+`;
 }
         if(newRange.note) html += `<p class="note">${newRange.note}</p>`;
         else html += `
